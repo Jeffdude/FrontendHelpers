@@ -1,0 +1,19 @@
+{
+  "name": "frontend-helpers",
+  "version": "1.0.0",
+  "author": "Jeffdude <jeffmilling@gmail.com> (jeffdude.github.io)",
+  "description": "Various Helpers I Use",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jeffdude/FrontendHelpers.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Jeffdude/FrontendHelpers/issues"
+  },
+  "homepage": "https://github.com/Jeffdude/FrontendHelpers#readme"
+}
