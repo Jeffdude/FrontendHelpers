@@ -12,32 +12,17 @@ import {
   setUserInfo,
   setAuthTokens,
   resetAuth,
-} from './authSlice.js';
-import {
-  selectInventoryId,
-  selectCategorySetId,
-  selectCSSetId,
-  setInventoryId,
-  setCategorySetId,
-  setPartTypeCategories,
-  setAuxiliaryParts,
-  setWithdrawAuxiliaryParts,
-  setCSSetId,
   setDebug,
-} from './inventorySlice.js';
+} from './authSlice.js';
 import config from '../config.js';
 import { getDateAfter, hasExpired, needsRefresh } from '../modules/date.js';
 import { queryClient } from '../modules/data.js';
 import { permissionLevelToAuthState } from '../constants.js';
 
 
-const AllALMs = {
+export default getAllALMs = (postAuthFn) => ({
   [fetchAuthRequest]: (action, dispatch, state) => {
     const accessToken = selectAccessToken(state);
-     
-    const inventoryId = selectInventoryId(state);
-    const categorySetId = selectCategorySetId(state);
-    const CSSetId = selectCSSetId(state);
      
     if (! accessToken) {
       console.log('User is not logged in. Resetting auth.');
@@ -71,21 +56,8 @@ const AllALMs = {
             permissionLevelToAuthState(res.permissionLevel))
           );
           dispatch(setUserInfo(res));
-          if(res.settings) {
-            dispatch(setPartTypeCategories(res.settings?.partTypeCategories))
-            dispatch(setAuxiliaryParts(res.settings?.auxiliaryParts))
-            dispatch(setWithdrawAuxiliaryParts(res.settings?.withdrawAuxiliaryParts))
-            dispatch(setDebug(!!res.settings?.debug))
-          }
-          if( !inventoryId) {
-            dispatch(setInventoryId(res.defaultInventory));
-          }
-          if( !categorySetId) {
-            dispatch(setCategorySetId(res.defaultCategorySet));
-          }
-          if( !CSSetId) {
-            dispatch(setCSSetId(res.defaultCSSet));
-          }
+          dispatch(setDebug(!!res?.settings?.debug))
+          postAuthFn({state, dispatch, userResult: res})
         } else {
           dispatch(resetAuth());
         }
@@ -186,6 +158,4 @@ const AllALMs = {
       }
     }
   },
-}
-
-export default AllALMs;
+})

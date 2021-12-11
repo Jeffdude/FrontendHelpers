@@ -10,6 +10,7 @@ const authSlice = createSlice({
     access_token: undefined,
     refresh_token: undefined,
     expires_at: undefined,
+    debug: undefined,
   },
   reducers: {
     setUserId: (state, action) => {
@@ -37,6 +38,9 @@ const authSlice = createSlice({
       state.refresh_token = undefined;
       state.expires_at = undefined;
     },
+    setDebug: (state, action) => {
+      state.debug = action.payload
+    },
     fetchAuthRequest: state => state,
     fetchUserIdRequest: state => state,
     verifyAuthRequest: state => state,
@@ -53,6 +57,7 @@ export const {
   fetchAuthRequest,
   fetchUserIdRequest,
   verifyAuthRequest,
+  setDebug,
 } = authSlice.actions;
 
 export const selectAuthState = state => state.auth.auth_state;
@@ -67,6 +72,7 @@ export const selectUserInfo = state => ({
 export const selectAuthExpiration = state => state.auth.expires_at;
 export const selectAccessToken = state => state.auth.access_token;
 export const selectRefreshToken = state => state.auth.refresh_token;
+export const selectDebug = state => state.inventory.debug;
 
 export const selectAuthHeader = state => {
   return {"Authorization": "Bearer " + state.auth.access_token}

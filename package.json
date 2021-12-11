@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Jeffdude/FrontendHelpers/issues"
   },
-  "homepage": "https://github.com/Jeffdude/FrontendHelpers#readme"
+  "homepage": "https://github.com/Jeffdude/FrontendHelpers#readme",
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.7.0"
+  }
 }
