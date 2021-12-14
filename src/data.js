@@ -1,18 +1,16 @@
 import React from 'react';
 
-import { useQuery } from 'react-query';
+import { useQuery, QueryClient  } from 'react-query';
 import { useSelector } from 'react-redux';
 
-import { QueryClient } from 'react-query';
+import { OptionalCard } from './components/common';
+import { InfoListFromObject } from './components/lists';
+import { selectDebug,  selectAuthHeader } from './redux/authSlice';
+import { getConfig } from './config';
 
-import { OptionalCard } from '../components/common.js';
-import { InfoListFromObject } from '../components/lists.js';
-import { selectAuthHeader } from '../redux/authSlice.js';
-import { selectDebug } from '../redux/inventorySlice.js';
-import config from '../config.js';
+const config = getConfig();
 
 export const queryClient = new QueryClient();
-
 
 export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) {
   const header = useSelector(selectAuthHeader);
@@ -53,7 +51,7 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
   }
 }
 
-export function createMutationCall(mutationFn, mutationVerb) {
+export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {}) {
   const { mutateAsync, error, status } = mutationFn;
   return async (to_submit) => {
     let result;
@@ -71,9 +69,7 @@ export function createMutationCall(mutationFn, mutationVerb) {
       console.log("[!] Error", mutationVerb, ":", result.status, result?.error);
       return {result: false, status};
     }
-    if (result) {
-      return {result, status};
-    }
+    if (result) return onSuccess ? onSuccess({result, status, submittedData: to_submit}) : {result, status};
     return {result: false, status};
   }
 }

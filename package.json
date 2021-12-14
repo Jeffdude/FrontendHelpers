@@ -3,9 +3,16 @@
   "version": "1.0.0",
   "author": "Jeffdude <jeffmilling@gmail.com> (jeffdude.github.io)",
   "description": "Various Helpers I Use",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist",
+    "readme.md"
+  ],
+  "private": false,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist --copy-files"
   },
   "repository": {
     "type": "git",
@@ -17,6 +24,18 @@
   },
   "homepage": "https://github.com/Jeffdude/FrontendHelpers#readme",
   "dependencies": {
-    "@reduxjs/toolkit": "^1.7.0"
+    "@babel/polyfill": "^7.12.1",
+    "@reduxjs/toolkit": "^1.7.0",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^4.3.1",
+    "react-query": "^3.34.2",
+    "react-redux": "^7.2.6",
+    "styled-components": "^5.3.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.0",
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "@babel/preset-react": "^7.16.5"
   }
 }

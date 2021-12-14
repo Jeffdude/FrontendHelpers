@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { HiChevronLeft, HiMenuAlt1, HiMenuAlt3 } from 'react-icons/hi';
 import { MdAdd } from 'react-icons/md';
 
-import { useGetResultIndicator } from './result.js';
+import { useGetResultIndicator } from '../result';
 
 const BackButtonStyle = styled.div`
   position: absolute;

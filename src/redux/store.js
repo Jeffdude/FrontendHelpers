@@ -11,10 +11,11 @@ import {
 import { Provider } from 'react-redux';
 import storage from 'redux-persist/lib/storage';
 import { persistStore } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
 
-import authReducer from './authSlice.js';
-import asyncListenerMiddleware from './asyncListenerMiddleware.js';
-import authALM from './authALM.js';
+import authReducer from './authSlice';
+import asyncListenerMiddleware from './asyncListenerMiddleware';
+import authALM from './authALM';
 
 
 exports.makeStore = ({
@@ -41,7 +42,7 @@ exports.makeStore = ({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
       }
-    }).concat(asyncListenerMiddleware(authALM))
+    }).concat(asyncListenerMiddleware(authALM(postAuthFn)))
   });
   const persistor = persistStore(store);
   return [

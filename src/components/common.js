@@ -3,7 +3,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 
-import StocktrackerLogo from '../assets/Stocktracker2.0Logo.svg';
+import { getConfig } from '../config';
+
+const { logoSvg, logoAltText } = getConfig()
 
 
 export const PageCard = styled.div`
@@ -49,8 +51,8 @@ export function TitleCard({title, data = {}, children}) {
     <PageCard>
       {title && <Helmet><title>{title}</title></Helmet>}
       <img
-        src={StocktrackerLogo}
-        alt={"JMKRIDE Stocktracker v2.0 logo"}
+        src={logoSvg}
+        alt={logoAltText}
         style={{width: "400px"}}
       />
       <div className="begoodpeople">

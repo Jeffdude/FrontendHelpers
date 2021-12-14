@@ -2,8 +2,8 @@ import React from 'react';
 
 import { useSelector } from 'react-redux';
 
-import { OptionalCard } from '../components/common.js';
-import { LoadingIcon } from '../components/loading.js';
+import { OptionalCard } from '../components/common';
+import { LoadingIcon } from '../components/loading';
 
 /*
  * Are you tired of redux giving you uninitialized values from useSelector?

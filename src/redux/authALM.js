@@ -13,14 +13,15 @@ import {
   setAuthTokens,
   resetAuth,
   setDebug,
-} from './authSlice.js';
-import config from '../config.js';
-import { getDateAfter, hasExpired, needsRefresh } from '../modules/date.js';
-import { queryClient } from '../modules/data.js';
-import { permissionLevelToAuthState } from '../constants.js';
+} from './authSlice';
+import { getConfig } from '../config';
+import { getDateAfter, hasExpired, needsRefresh } from '../date';
+import { queryClient } from '../data';
+import { permissionLevelToAuthState } from '../constants';
 
+const config = getConfig();
 
-export default getAllALMs = (postAuthFn) => ({
+const getAllALMs = (postAuthFn) => ({
   [fetchAuthRequest]: (action, dispatch, state) => {
     const accessToken = selectAccessToken(state);
      
@@ -159,3 +160,4 @@ export default getAllALMs = (postAuthFn) => ({
     }
   },
 })
+export default getAllALMs;
