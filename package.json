@@ -1,6 +1,6 @@
 {
   "name": "jeffdude-frontend-helpers",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Jeffdude <jeffmilling@gmail.com> (jeffdude.github.io)",
   "description": "Various Helpers I Use",
   "main": "dist/index.js",
@@ -23,7 +23,7 @@
     "url": "https://github.com/Jeffdude/FrontendHelpers/issues"
   },
   "homepage": "https://github.com/Jeffdude/FrontendHelpers#readme",
-  "peerDependencies": {
+  "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "@reduxjs/toolkit": "^1.7.0",
     "react-helmet": "^6.1.0",
