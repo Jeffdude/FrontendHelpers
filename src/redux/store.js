@@ -8,17 +8,15 @@ import {
   PURGE,
   REGISTER
 } from 'redux-persist';
-import { Provider } from 'react-redux';
 import storage from 'redux-persist/lib/storage';
 import { persistStore } from 'redux-persist';
-import { PersistGate } from 'redux-persist/integration/react';
 
 import authReducer from './authSlice';
 import asyncListenerMiddleware from './asyncListenerMiddleware';
 import authALM from './authALM';
 
 
-exports.makeStore = ({
+export const makeStore = ({
   reducers = {},
   persistWhitelist = [],
   loadingComponent = null,
@@ -45,14 +43,5 @@ exports.makeStore = ({
     }).concat(asyncListenerMiddleware(authALM(postAuthFn)))
   });
   const persistor = persistStore(store);
-  return [
-    store, 
-    ({children}) => (
-      <Provider store={store}>
-        <PersistGate loading={loadingComponent} persistor={persistor}>
-          {children}
-        </PersistGate>
-      </Provider>
-    ),
-  ]
+  return [store, persistor]
 }

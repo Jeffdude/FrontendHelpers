@@ -1,7 +1,7 @@
 let logoSvg = undefined;
 let logoAltText = "Logo";
 
-let backendUrl = "localhost:3000"
+let backendUrl = "http://localhost:3000"
 
 export const configure = ({
   logoSvg : newLogoSvg, logoAltText : newLogoAltText,
