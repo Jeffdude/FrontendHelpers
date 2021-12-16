@@ -2,7 +2,7 @@ import { useMutation } from 'react-query';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { selectAuthHeader } from '../redux/authSlice';
-import { getConfig } from '../config';
+import { useGetConfig } from '../config';
 import { createMutationCall } from '../data';
 import {
   setUserId,
@@ -11,8 +11,6 @@ import {
 } from '../redux/authSlice'
 import { getDateAfter } from '../date';
 import { useGetQuery, queryClient } from '../data';
-
-const config = getConfig();
 
 function useGetAuthQuery(endpoint, options) {
   return useGetQuery(
@@ -27,6 +25,7 @@ export function useCreateAccount(){
   let dispatch = useDispatch();
   let login = useLogin();
 
+  const config = useGetConfig();
   const mutationFn = useMutation(({to_submit}) => fetch(
     config.backend_url + "users/create",
     {
@@ -56,6 +55,7 @@ export function useCreateAccount(){
 export function useLogin(options = {}){
   let dispatch = useDispatch();
 
+  const config = useGetConfig();
   const mutationFn = useMutation((to_submit) => fetch(
     config.backend_url + "auth",
     {
@@ -86,6 +86,7 @@ export function useGetSessions() {
 
 export function useDisableSession(){
   const header = useSelector(selectAuthHeader);
+  const config = useGetConfig();
 
   const mutationFn  = useMutation(
     ({to_submit}) => fetch(
@@ -107,6 +108,7 @@ export function useDisableSession(){
 
 export function useAdminResetUserPassword(userId, options = {}){
   const header = useSelector(selectAuthHeader);
+  const config = useGetConfig();
   const mutationFn = useMutation(
     ({to_submit}) => fetch(
       config.backend_url + "auth/reset_password/admin",
@@ -125,6 +127,7 @@ export function useAdminResetUserPassword(userId, options = {}){
 
 export function useDeleteUser(userId, options = {}) {
   const header = useSelector(selectAuthHeader);
+  const config = useGetConfig();
   const mutationFn = useMutation(
     ({to_submit}) => fetch(
       config.backend_url + "users/id/" + userId,
@@ -138,6 +141,7 @@ export function useDeleteUser(userId, options = {}) {
 }
 
 export function useCreateUser(options = {}) {
+  const config = useGetConfig();
   const header = useSelector(selectAuthHeader);
   const mutationFn = useMutation(
     ({to_submit}) => fetch(
@@ -166,6 +170,7 @@ export function useGetUser(id) {
 
 export function usePatchUser(userId, options = {}) {
   const header = useSelector(selectAuthHeader);
+  const config = useGetConfig();
   const mutationFn = useMutation(
     ({to_submit}) => fetch(
       config.backend_url + "users/id/" + userId,

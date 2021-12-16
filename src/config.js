@@ -1,19 +1,23 @@
-let logoSvg = undefined;
-let logoAltText = "Logo";
+import { createContext } from 'react';
 
-let backendUrl = "http://localhost:3000"
-
-export const configure = ({
-  logoSvg : newLogoSvg, logoAltText : newLogoAltText,
-  backendUrl : newBackendUrl,
-}) => {
-  logoSvg = newLogoSvg ? newLogoSvg : logoSvg;
-  logoAltText = newLogoAltText ? newLogoAltText : logoAltText;
-  backendUrl = newBackendUrl ? newBackendUrl : backendUrl;
+const defaultConfig = {
+  backendUrl: "http://localhost:3600",
+  logoSvg: undefined,
+  logoAltText: "Logo",
 }
 
-export const getConfig = () => ({
-  logoSvg, logoAltText, backendUrl,
-  backend_url: backendUrl + "/api/v1/",
-  backend_url_v2: backendUrl + "/api/v2/",
-});
+const ConfigContext = createContext({config: {}});
+
+export const getConfigurationContext = (configuration) => {
+  const config = {...defaultConfig, configuration};
+  return [ConfigContext.Provider, config]
+}
+
+export const useGetConfig = () => {
+  const config = useContext(ConfigContext);
+  return {
+    ...config,
+    backend_url: config.backendUrl + "/api/v1/",
+    backend_url_v2: config.backendUrl + "/api/v2/",
+  }
+}

@@ -6,13 +6,12 @@ import { useSelector } from 'react-redux';
 import { OptionalCard } from './components/common';
 import { InfoListFromObject } from './components/lists';
 import { selectDebug,  selectAuthHeader } from './redux/authSlice';
-import { getConfig } from './config';
-
-const config = getConfig();
+import { useGetConfig } from './config';
 
 export const queryClient = new QueryClient();
 
 export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) {
+  const config = useGetConfig();
   const header = useSelector(selectAuthHeader);
   const debug = useSelector(selectDebug);
   const enabled = options?.enabled !== undefined ? options.enabled : true;
