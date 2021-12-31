@@ -11,6 +11,7 @@
   ],
   "private": false,
   "scripts": {
+    "start": "react-scripts start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist --copy-files"
   },
@@ -30,6 +31,7 @@
     "react-icons": "^4.3.1",
     "react-query": "^3.34.2",
     "react-redux": "^7.2.6",
+    "react-scripts": "^5.0.0",
     "redux-persist": "^6.0.0",
     "styled-components": "^5.3.3"
   },
@@ -38,5 +40,17 @@
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
     "@babel/preset-react": "^7.16.5"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
