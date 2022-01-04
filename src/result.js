@@ -43,9 +43,9 @@ export function useGetResultIndicator({successStatus = 201, onSuccess = () => {}
 
   return {
     setSubmitting, 
-    options: {onSettled: result => {
+    options: {onSettled: (result) => {
       setSubmitting(false);
-      let success = result.ok && result.status === successStatus;
+      let success = result && result.ok && result.status === successStatus;
       if(!success) console.log("[!][ResultIndicator] Failed Result:", result);
       setSubmissionResult(success);
     }},

@@ -1,20 +1,21 @@
 import React from 'react';
 
-import { useQuery, QueryClient  } from 'react-query';
-import { useSelector } from 'react-redux';
+import { useQuery, useMutation, QueryClient  } from 'react-query';
+import { useGetHeader } from './hooks/auth';
+import { useGetBackendURL } from './hooks/data';
+import { useGetDebug } from './hooks/debug';
 
 import { OptionalCard } from './components/common';
 import { InfoListFromObject } from './components/lists';
-import { selectDebug,  selectAuthHeader } from './redux/authSlice';
-import { useGetConfig } from './config';
 
 export const queryClient = new QueryClient();
 
 export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) {
-  const config = useGetConfig();
-  const header = useSelector(selectAuthHeader);
-  const debug = useSelector(selectDebug);
+  const backendURL = useGetBackendURL();
+  const header = useGetHeader();
+  const debug = useGetDebug();
   const enabled = options?.enabled !== undefined ? options.enabled : true;
+
   // caching invalidations from either
   const cache = Array.isArray(key) ? key.concat(endpoint) : [key, endpoint];
   if (debug && enabled) console.log("[Debug][GET][" + version + "][" + endpoint + "] Loading...")
@@ -22,7 +23,7 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
     const query = useQuery(
       cache,
       () => fetch(
-        (version === "v1" ? config.backend_url : config.backend_url_v2) + endpoint,
+        (version === "v1" ? backendURL.v1 : backendURL.v2) + endpoint,
         {
           method: "GET",
           headers: header,
@@ -50,6 +51,29 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
   }
 }
 
+export function useCreateMutation(
+  {endpoint, method, headers = {}, verb, body = true, options, createMutationCallOptions}
+) {
+  const authHeader = useGetHeader();
+  const backendURL = useGetBackendURL();
+  const mutationFn  = useMutation(
+    ({to_submit}) => fetch(
+      backendURL.v1 + endpoint,
+      {
+        method,
+        headers: {
+          ...authHeader,
+          ...(body ? {"Content-Type": "application/json"} : {}),
+          ...headers,
+        },
+        body: body ? JSON.stringify(to_submit) : undefined,
+      },
+    ),
+    options,
+  )
+  return createMutationCall(mutationFn, verb, createMutationCallOptions)
+}
+
 export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {}) {
   const { mutateAsync, error, status } = mutationFn;
   return async (to_submit) => {
@@ -68,7 +92,10 @@ export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {})
       console.log("[!] Error", mutationVerb, ":", result.status, result?.error);
       return {result: false, status};
     }
-    if (result) return onSuccess ? onSuccess({result, status, submittedData: to_submit}) : {result, status};
+    if (result){ 
+      result = await result.json();
+      return onSuccess ? onSuccess({result, status, submittedData: to_submit}) : {result, status};
+    }
     return {result: false, status};
   }
 }

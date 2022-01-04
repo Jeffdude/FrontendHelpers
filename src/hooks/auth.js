@@ -1,16 +1,25 @@
-import { useMutation } from 'react-query';
-import { useSelector, useDispatch } from 'react-redux';
+import { useContext } from 'react';
 
-import { selectAuthHeader } from '../redux/authSlice';
-import { useGetConfig } from '../config';
-import { createMutationCall } from '../data';
-import {
-  setUserId,
-  setAuthTokens,
-  fetchAuthRequest,
-} from '../redux/authSlice'
+import { useCreateMutation, useGetQuery, queryClient } from '../data';
 import { getDateAfter } from '../date';
-import { useGetQuery, queryClient } from '../data';
+import { useGetUserId } from './user'
+
+import { JFHContext, useGetDispatch, ACTIONS } from '../context';
+
+const useGetAccessToken = () => {
+  const [{access_token},] = useContext(JFHContext);
+  return access_token;
+}
+
+export const useGetHeader = () => {
+  const [{access_token},] = useContext(JFHContext);
+  return {Authorization: 'Bearer ' + access_token}
+}
+
+export const useGetAuthState = () => {
+  const [{auth_state,},] = useContext(JFHContext);
+  return auth_state;
+}
 
 function useGetAuthQuery(endpoint, options) {
   return useGetQuery(
@@ -21,76 +30,132 @@ function useGetAuthQuery(endpoint, options) {
 }
 
 export function useCreateAccount(){
-
-  let dispatch = useDispatch();
+  const dispatch = useGetDispatch();
   let login = useLogin();
-
-  const config = useGetConfig();
-  const mutationFn = useMutation(({to_submit}) => fetch(
-    config.backend_url + "users/create",
-    {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(to_submit),
-    }).then(res => res.json()),
-    {
+  return useCreateMutation({
+    endpoint: "users/create",
+    method: "POST",
+    verb: "creating account",
+    options: {
       onSuccess: async () => {
         queryClient.invalidateQueries('user');
         queryClient.invalidateQueries('users');
       }
     },
-  );
-  return createMutationCall(mutationFn, "creating account", {
-    onSuccess: ({result, submittedData})=> {
-      if(result && result.id) {
-        dispatch(setUserId(result.id));
-        const { email, password } = submittedData;
-        return login({email, password});
+    createMutationCallOptions: {
+      onSuccess: ({result, submittedData})=> {
+        if(result && result.id) {
+          dispatch({type: ACTIONS.setUserId, payload: result.id});
+          const { email, password } = submittedData;
+          return login({email, password});
+        }
+        return false;
       }
-      return false;
     }
-  });
+  })
+}
+
+export function useLoadUserInfo(){
+  const dispatch = useGetDispatch();
+  const accessToken = useGetAccessToken();
+  useGetAuthQuery(
+    "users/self",
+    {
+      enabled: !!accessToken,
+      refetchOnWindowFocus: false,
+      onSettled: (result) => {
+        if(result?.id){
+          dispatch({type: ACTIONS.setUserId, payload: result.id})
+        } else {
+          console.log("[!] Error fetching userId:", result);
+        }
+      }
+    }
+  )
+  const userId = useGetUserId();
+  useGetAuthQuery(
+    "users/id/" + userId,
+    {
+      enabled: !!userId,
+      refetchOnWindowFocus: false,
+      onSettled: (result) => {
+        if(!result){
+          console.log("[!] Error fetching user info:", result);
+          dispatch({type: ACTIONS.resetAuth})
+        } else {
+          dispatch({type: ACTIONS.setUserInfo, payload: result})
+        }
+      }
+    }
+  )
 }
 
 export function useLogin(options = {}){
-  let dispatch = useDispatch();
-
-  const config = useGetConfig();
-  const mutationFn = useMutation((to_submit) => fetch(
-    config.backend_url + "auth",
-    {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(to_submit),
-    }).then(res => res.json()),
+  const dispatch = useGetDispatch();
+  return useCreateMutation({
+    endpoint: "auth",
+    method: "POST",
+    verb: "logging in",
     options,
-  );
-  
-  return createMutationCall(mutationFn, "logging in", { onSuccess: ({result}) => {
-    if (result && result.accessToken && result.refreshToken && result.expiresIn) {
-      dispatch(setAuthTokens({
-        access_token: result.accessToken,
-        refresh_token: result.refreshToken,
-        expires_at: getDateAfter(result.expiresIn),
-      }));
-      dispatch(fetchAuthRequest());
-      return true;
+    createMutationCallOptions: { onSuccess: ({result}) => {
+      console.log(result);
+      if (result && result.accessToken && result.refreshToken && result.expiresIn) {
+        dispatch({
+          type: ACTIONS.setAuthTokens, 
+          payload: {
+            access_token: result.accessToken,
+            refresh_token: result.refreshToken,
+            expires_at: getDateAfter(result.expiresIn),
+          },
+        });
+      }
+      return false;
+    }}
+  })
+}
+
+export function useDeleteSelfSession(options) {
+  const dispatch = useGetDispatch();
+  const accessToken = useGetAccessToken();
+  const mutation = useCreateMutation({
+    endpoint: "auth/sessions/self",
+    method: "DELETE",
+    verb: "logging out",
+    body: false,
+    options: {
+      onSuccess: async() => {
+        await dispatch({type: ACTIONS.resetAuth});
+        queryClient.invalidateQueries('auth');
+      }
     }
-    return false;
-  }});
+  })
+  return accessToken ? mutation : () => dispatch({type: ACTIONS.resetAuth});
+}
+
+export function useLogout() {
+  return useDeleteSelfSession();
 }
 
 export function useGetSessions() {
   return useGetAuthQuery("auth/sessions/self", {version: "v2"});
 }
 
+//New interface! (sessionId in body, not endpoint) TODO: Double check these calls
 export function useDisableSession(){
-  const header = useSelector(selectAuthHeader);
-  const config = useGetConfig();
+  return useCreateMutation({
+    endpoint: "auth/session",
+    method: "DELETE",
+    verb: "disabling session",
+    options: {onSuccess: () => queryClient.invalidateQueries('auth')}
+  })
+}
+/*
+  const header = useGetHeader();
+  const backendURL = useGetBackendURL();
 
   const mutationFn  = useMutation(
     ({to_submit}) => fetch(
-      config.backend_url + "auth/sessions/id/" + to_submit.session_id,
+      backendURL.v1 + "auth/sessions/id/" + to_submit.session_id,
       {
         method: "DELETE",
         headers: header,
@@ -105,60 +170,34 @@ export function useDisableSession(){
 
   return createMutationCall(mutationFn, "disabling session");
 }
+*/
 
-export function useAdminResetUserPassword(userId, options = {}){
-  const header = useSelector(selectAuthHeader);
-  const config = useGetConfig();
-  const mutationFn = useMutation(
-    ({to_submit}) => fetch(
-      config.backend_url + "auth/reset_password/admin",
-      {
-        method: "POST",
-        headers: {
-          ...header,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(to_submit),
-      }),
+export function useAdminResetUserPassword(options = {}){
+  return useCreateMutation({
+    endpoint: "auth/reset_password/admin",
+    method: "POST",
+    verb: "resetting password with admin priviledges",
     options,
-  );
-  return createMutationCall(mutationFn, "resetting password with admin priviledges");
+  })
 }
 
 export function useDeleteUser(userId, options = {}) {
-  const header = useSelector(selectAuthHeader);
-  const config = useGetConfig();
-  const mutationFn = useMutation(
-    ({to_submit}) => fetch(
-      config.backend_url + "users/id/" + userId,
-      {
-        method: "DELETE",
-        headers: header,
-      }),
+  return useCreateMutation({
+    endpoint: "users/id/" + userId,
+    method: "DELETE",
+    verb: "deleting user",
     options,
-  );
-  return createMutationCall(mutationFn, "deleting user");
+  })
 }
 
 export function useCreateUser(options = {}) {
-  const config = useGetConfig();
-  const header = useSelector(selectAuthHeader);
-  const mutationFn = useMutation(
-    ({to_submit}) => fetch(
-      config.backend_url + "users/create",
-      {
-        method: "POST",
-        headers: {
-          ...header,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(to_submit),
-      }),
+  return useCreateMutation({
+    endpoint: "users/create",
+    method: "POST",
+    verb: "creating user",
     options,
-  );
-  return createMutationCall(mutationFn, "creating user");
+  })
 }
-
 
 export function useGetAllUsers() {
   return useGetAuthQuery("users/all", {version: "v2"});
@@ -169,20 +208,10 @@ export function useGetUser(id) {
 }
 
 export function usePatchUser(userId, options = {}) {
-  const header = useSelector(selectAuthHeader);
-  const config = useGetConfig();
-  const mutationFn = useMutation(
-    ({to_submit}) => fetch(
-      config.backend_url + "users/id/" + userId,
-      {
-        method: "PATCH",
-        headers: {
-          ...header,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(to_submit),
-      }),
+  return useCreateMutation({
+    endpoint: "users/id/" + userId,
+    method: "PATCH",
+    verb: "patching user",
     options,
-  );
-  return createMutationCall(mutationFn, "patching user");
+  })
 }

@@ -1,11 +1,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Helmet } from 'react-helmet';
-
-import { getConfig } from '../config';
-
-const { logoSvg, logoAltText } = getConfig()
+// import { Helmet } from 'react-helmet';
 
 
 export const PageCard = styled.div`
@@ -45,7 +41,7 @@ export const DisableCover = styled.div`
   position: absolute;
   zIndex: 5;
 `
-
+/*
 export function TitleCard({title, data = {}, children}) {
   return (
     <PageCard>
@@ -62,6 +58,7 @@ export function TitleCard({title, data = {}, children}) {
     </PageCard>
   )
 }
+*/
 
 export const CreateForm = styled.div`
   form {

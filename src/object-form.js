@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import {
   CreateForm, PageCard, DisableCover
-} from '../components/common';
-import { LoadingIcon } from '../components/loading';
-import { ResultIndicator } from '../components/result';
+} from './components/common';
+import { LoadingIcon } from './components/loading';
+import { ResultIndicator } from './result';
 
 
 export const TextComponent = (placeholder, moreProps = {}) => (props) => (
