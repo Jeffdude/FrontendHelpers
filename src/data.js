@@ -14,7 +14,7 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
   const backendURL = useGetBackendURL();
   const header = useGetHeader();
   const debug = useGetDebug();
-  const enabled = options?.enabled !== undefined ? options.enabled : true;
+  const enabled = (options?.enabled !== undefined ? options.enabled : true) && header !== undefined;
 
   // caching invalidations from either
   const cache = Array.isArray(key) ? key.concat(endpoint) : [key, endpoint];

@@ -13,6 +13,9 @@ const useGetAccessToken = () => {
 
 export const useGetHeader = () => {
   const [{access_token},] = useContext(JFHContext);
+  if(!access_token){
+    return undefined;
+  }
   return {Authorization: 'Bearer ' + access_token}
 }
 
@@ -45,11 +48,10 @@ export function useCreateAccount(){
     createMutationCallOptions: {
       onSuccess: ({result, submittedData})=> {
         if(result && result.id) {
-          dispatch({type: ACTIONS.setUserId, payload: result.id});
           const { email, password } = submittedData;
           return login({email, password});
         }
-        return false;
+        return {result: false};
       }
     }
   })
@@ -98,7 +100,6 @@ export function useLogin(options = {}){
     verb: "logging in",
     options,
     createMutationCallOptions: { onSuccess: ({result}) => {
-      console.log(result);
       if (result && result.accessToken && result.refreshToken && result.expiresIn) {
         dispatch({
           type: ACTIONS.setAuthTokens, 
@@ -108,13 +109,14 @@ export function useLogin(options = {}){
             expires_at: getDateAfter(result.expiresIn),
           },
         });
+        return {result: true}
       }
-      return false;
+      return {result: false};
     }}
   })
 }
 
-export function useDeleteSelfSession(options) {
+export function useLogout(options) {
   const dispatch = useGetDispatch();
   const accessToken = useGetAccessToken();
   const mutation = useCreateMutation({
@@ -132,10 +134,6 @@ export function useDeleteSelfSession(options) {
   return accessToken ? mutation : () => dispatch({type: ACTIONS.resetAuth});
 }
 
-export function useLogout() {
-  return useDeleteSelfSession();
-}
-
 export function useGetSessions() {
   return useGetAuthQuery("auth/sessions/self", {version: "v2"});
 }
@@ -149,28 +147,6 @@ export function useDisableSession(){
     options: {onSuccess: () => queryClient.invalidateQueries('auth')}
   })
 }
-/*
-  const header = useGetHeader();
-  const backendURL = useGetBackendURL();
-
-  const mutationFn  = useMutation(
-    ({to_submit}) => fetch(
-      backendURL.v1 + "auth/sessions/id/" + to_submit.session_id,
-      {
-        method: "DELETE",
-        headers: header,
-      }
-    ),
-    {
-      onSuccess: async () => {
-        queryClient.invalidateQueries('auth');
-      },
-    }
-  );
-
-  return createMutationCall(mutationFn, "disabling session");
-}
-*/
 
 export function useAdminResetUserPassword(options = {}){
   return useCreateMutation({
