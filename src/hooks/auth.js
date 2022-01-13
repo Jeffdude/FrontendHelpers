@@ -175,6 +175,11 @@ export function useCreateUser(options = {}) {
   })
 }
 
+export function useGetSelf(){
+  const userId = useGetUserId()
+  return useGetAuthQuery("users/id/" + userId, {...options, enabled: !!userId, version: "v2"})
+}
+
 export function useGetAllUsers() {
   return useGetAuthQuery("users/all", {version: "v2"});
 }
