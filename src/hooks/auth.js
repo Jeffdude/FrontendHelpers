@@ -64,8 +64,9 @@ export function useLoadUserInfo(){
     "users/self",
     {
       enabled: !!accessToken,
+      version: "v2",
       refetchOnWindowFocus: false,
-      onSettled: (result) => {
+      onSettled: ({ result }) => {
         if(result?.id){
           dispatch({type: ACTIONS.setUserId, payload: result.id})
         } else {
@@ -79,8 +80,9 @@ export function useLoadUserInfo(){
     "users/id/" + userId,
     {
       enabled: !!userId,
+      version: "v2",
       refetchOnWindowFocus: false,
-      onSettled: (result) => {
+      onSettled: ({ result }) => {
         if(!result){
           console.log("[!] Error fetching user info:", result);
           dispatch({type: ACTIONS.resetAuth})
@@ -189,6 +191,9 @@ export function useGetUser(id) {
 }
 
 export function usePatchUser(userId, options = {}) {
+  if(userId === undefined){
+    userId = useGetUserId();
+  }
   return useCreateMutation({
     endpoint: "users/id/" + userId,
     method: "PATCH",
