@@ -1,6 +1,6 @@
 {
   "name": "@jeffdude/frontend-helpers",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Authentication + Various Helpers I use",
   "main": "dist/index.js",
   "dependencies": {
