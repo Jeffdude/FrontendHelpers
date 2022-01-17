@@ -31,7 +31,7 @@ const JFHApp = ({config, children}) => {
   const cookieState = JFHCookies.get('JFHCookie');
   const [state, dispatch] = useReducerWithMiddleware(
     reducer, 
-    {...DEFAULT_STATE, ...cookieState, ...config},
+    {...DEFAULT_STATE, ...cookieState, ...config, config},
     {
       middlewareFns: [loggingMiddleware],
       afterwareFns: [persistAfterware],

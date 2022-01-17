@@ -1,7 +1,31 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useGetDebug, useSetDebug } from './hooks/debug';
-import { useLogin, useLogout, useCreateAccount } from './hooks/auth';
-import { PageCard } from './components/common'
+import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser } from './hooks/auth';
+import { QueryLoader } from './data';
+
+const userInfoContext = React.createContext()
+
+const PatchUserTest = ({userInfo}) => {
+  return <userInfoContext.Provider value={userInfo}>
+    <PatchUserConsumer/>
+  </userInfoContext.Provider>
+}
+
+const PatchUserConsumer = () => {
+  const userInfo = useContext(userInfoContext);
+  const [firstName, setFirstName] = useState(userInfo.firstName ? userInfo.firstName : '')
+  const patchUser = usePatchUser();
+  const onSubmitPatchUser = () => patchUser({ firstName });
+  return (
+    <div style={{marginTop: "20px", border: "2px solid black"}}>
+      - Patch user test - <br/>Username: {userInfo.firstName}
+      <form onSubmit={onSubmitPatchUser}>
+        <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder='name'/>
+        <button type="submit">save</button>
+      </form>
+    </div>
+  )
+}
 
 function App() {
   const debugState = useGetDebug();
@@ -23,8 +47,12 @@ function App() {
     const result = await login({email, password})
     console.log("result:", result);
   }
+  const userInfoQuery = useGetSelf();
+  const authState = useGetAuthState();
   return (
-    <PageCard>
+    <div style={{
+      padding: "10px", display: "flex", flexDirection: "column", width: "200px", alignItems: "flex-start"
+    }}>
       {debugState ? "true" : "false"}
       <button onClick={() => setDebug(!debugState)}>swap</button>
       <button onClick={() => login({email: "admin@admin.com", password: "pass"})}>
@@ -33,15 +61,16 @@ function App() {
       <button onClick={() => logout()}>
         log out
       </button>
-      <input type="text" value={email} onChange={e => setEmail(e.target.value)}/>
-      <input type="text" value={password} onChange={e => setPassword(e.target.value)}/>
+      <input type="text" value={email} onChange={e => setEmail(e.target.value)} placeholder='email'/>
+      <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder='password'/>
       <form onSubmit={onSubmitCreateAccount}>
         <button type="submit">Create Account</button>
       </form>
       <form onSubmit={onSubmitSignIn}>
         <button type="submit">Sign In</button>
       </form>
-    </PageCard>
+      {authState && <QueryLoader query={userInfoQuery} propName="userInfo"><PatchUserTest/></QueryLoader>}
+    </div>
   );
 }
 

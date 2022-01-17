@@ -5,11 +5,9 @@ export const DEFAULT_STATE = {
   expires_at: undefined,
 
   user_id: undefined,
-  user_firstName: undefined,
-  user_lastName: undefined,
-  user_email: undefined,
-  user_createdAt: undefined,
+  user: {},
 
+  backendURL: "http://localhost:3600",
   debug: true,
 }
 
