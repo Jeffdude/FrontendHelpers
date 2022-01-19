@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
-    "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "react": "^17.0.2",
@@ -21,6 +20,13 @@
     "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist --copy-files",
     "test": "jest",
     "eject": "react-scripts eject"
+  },
+  "jest": {
+    "automock": false,
+    "testEnvironment": "jsdom",
+    "setupFiles": [
+      "./src/tests/setupTests.js"
+    ]
   },
   "repository": {
     "type": "git",
@@ -48,7 +54,10 @@
     "@babel/cli": "^7.16.7",
     "@babel/core": "^7.16.7",
     "@babel/preset-env": "^7.16.7",
+    "@testing-library/dom": "^8.11.2",
+    "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react-hooks": "^7.0.2",
-    "jest": "^27.4.7"
+    "jest": "^27.4.7",
+    "jest-fetch-mock": "^3.0.3"
   }
 }

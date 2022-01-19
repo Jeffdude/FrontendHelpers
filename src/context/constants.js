@@ -7,7 +7,7 @@ export const DEFAULT_STATE = {
   user_id: undefined,
   user: {},
 
-  backendURL: "http://localhost:3600",
+  backendURL: "http://192.168.0.88:3600",
   debug: true,
 }
 
