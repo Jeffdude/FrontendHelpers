@@ -1,21 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { useGetDebug, useSetDebug } from './hooks/debug';
 import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser } from './hooks/auth';
+import { useGetUserInfo } from './hooks/user';
 import { QueryLoader } from './data';
 
-const userInfoContext = React.createContext()
-
 const PatchUserTest = ({userInfo}) => {
-  return <userInfoContext.Provider value={userInfo}>
-    <PatchUserConsumer/>
-  </userInfoContext.Provider>
-}
-
-const PatchUserConsumer = () => {
-  const userInfo = useContext(userInfoContext);
   const [firstName, setFirstName] = useState(userInfo.firstName ? userInfo.firstName : '')
   const patchUser = usePatchUser();
-  const onSubmitPatchUser = () => patchUser({ firstName });
+  const onSubmitPatchUser = (e) => {
+    e.preventDefault();
+    patchUser({ firstName });
+  }
   return (
     <div style={{marginTop: "20px", border: "2px solid black"}}>
       - Patch user test - <br/>Username: {userInfo.firstName}
@@ -49,6 +44,7 @@ function App() {
   }
   const userInfoQuery = useGetSelf();
   const authState = useGetAuthState();
+  const userInfo = useGetUserInfo()
   return (
     <div style={{
       padding: "10px", display: "flex", flexDirection: "column", width: "200px", alignItems: "flex-start"
@@ -69,7 +65,7 @@ function App() {
       <form onSubmit={onSubmitSignIn}>
         <button type="submit">Sign In</button>
       </form>
-      {authState && <QueryLoader query={userInfoQuery} propName="userInfo"><PatchUserTest/></QueryLoader>}
+      {authState && <QueryLoader query={userInfoQuery} propName="userInfo"><PatchUserTest userInfo={userInfo}/></QueryLoader>}
     </div>
   );
 }

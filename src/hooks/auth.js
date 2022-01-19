@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { useCreateMutation, useGetQuery, queryClient } from '../data';
+import { useCreateMutation, useGetQuery, queryClient, mergeQueryOptions } from '../data';
 import { getDateAfter } from '../date';
 import { useGetUserId } from './user'
 
@@ -32,19 +32,20 @@ function useGetAuthQuery(endpoint, options) {
   )
 }
 
-export function useCreateAccount(){
+const invalidateCache = () => {
+  queryClient.invalidateQueries('user');
+  queryClient.invalidateQueries('users');
+  queryClient.invalidateQueries('auth');
+}
+
+export function useCreateAccount(options = {}){
   const dispatch = useGetDispatch();
   let login = useLogin();
   return useCreateMutation({
     endpoint: "users/create",
     method: "POST",
     verb: "creating account",
-    options: {
-      onSuccess: async () => {
-        queryClient.invalidateQueries('user');
-        queryClient.invalidateQueries('users');
-      }
-    },
+    options: mergeQueryOptions(options, { onSuccess: invalidateCache }),
     createMutationCallOptions: {
       onSuccess: ({result, submittedData})=> {
         if(result && result.id) {
@@ -100,7 +101,7 @@ export function useLogin(options = {}){
     endpoint: "auth",
     method: "POST",
     verb: "logging in",
-    options,
+    options: mergeQueryOptions(options, { onSuccess: invalidateCache }),
     createMutationCallOptions: { onSuccess: ({result}) => {
       if (result && result.accessToken && result.refreshToken && result.expiresIn) {
         dispatch({
@@ -118,7 +119,7 @@ export function useLogin(options = {}){
   })
 }
 
-export function useLogout(options) {
+export function useLogout(options = {}) {
   const dispatch = useGetDispatch();
   const accessToken = useGetAccessToken();
   const mutation = useCreateMutation({
@@ -126,12 +127,10 @@ export function useLogout(options) {
     method: "DELETE",
     verb: "logging out",
     body: false,
-    options: {
-      onSuccess: async() => {
-        await dispatch({type: ACTIONS.resetAuth});
-        queryClient.invalidateQueries('auth');
-      }
-    }
+    options: mergeQueryOptions(options, { onSuccess: async () => {
+      await dispatch({type: ACTIONS.resetAuth});
+      invalidateCache();
+    }}),
   })
   return accessToken ? mutation : () => dispatch({type: ACTIONS.resetAuth});
 }
@@ -146,7 +145,7 @@ export function useDisableSession(){
     endpoint: "auth/session",
     method: "DELETE",
     verb: "disabling session",
-    options: {onSuccess: () => queryClient.invalidateQueries('auth')}
+    options: {onSuccess: invalidateCache}
   })
 }
 
@@ -198,6 +197,6 @@ export function usePatchUser(userId, options = {}) {
     endpoint: "users/id/" + userId,
     method: "PATCH",
     verb: "patching user",
-    options,
+    options: mergeQueryOptions(options, { onSuccess: invalidateCache }),
   })
 }
