@@ -5,8 +5,7 @@ import { useGetHeader } from './hooks/auth';
 import { useGetBackendURL } from './hooks/data';
 import { useGetDebug } from './hooks/debug';
 
-import { OptionalCard } from './components/common';
-import { InfoListFromObject } from './components/lists';
+import { InfoListFromObject } from './lists';
 
 export const queryClient = new QueryClient();
 
@@ -103,9 +102,9 @@ export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {})
 export function onQuerySuccess(query, thenFn, {name = "Resource", pageCard = false} = {}) {
   if(query.status === 'loading' || query.status === 'idle') {
     return (
-      <OptionalCard pageCard={pageCard}>
+      <div>
         {name} loading...
-      </OptionalCard>
+      </div>
     )
   }
   if(query.status !== 'success') {
@@ -116,7 +115,7 @@ export function onQuerySuccess(query, thenFn, {name = "Resource", pageCard = fal
       },
     )
     return (
-      <OptionalCard pageCard={pageCard}>
+      <div>
         <h3 className="error-text">Error loading {name}!</h3>
         <InfoListFromObject data={{
           status: query.status,
@@ -125,7 +124,7 @@ export function onQuerySuccess(query, thenFn, {name = "Resource", pageCard = fal
             ? JSON.stringify(query.data).slice(0, 50) + "..."
             : query.data,
         }}/>
-      </OptionalCard>
+      </div>
     )
   }
   if (!Object.hasOwnProperty.call(query.data, 'result')) {
@@ -141,13 +140,7 @@ export function onQuerySuccess(query, thenFn, {name = "Resource", pageCard = fal
 
 export function QueryLoader({query, propName, pageCard, children, ...props}) {
   return onQuerySuccess(query, (data) => {
-    if(!data.result) {
-      return (
-        <OptionalCard pageCard={pageCard}>
-          <h3>{propName} Not Found.</h3>
-        </OptionalCard>
-      );
-    }
+    if(!data.result) return (<h3>{propName} Not Found.</h3>);
     return React.Children.map(children, child => {
       if (React.isValidElement(child)) {
         return React.cloneElement(child, {[propName]: data.result, ...props})

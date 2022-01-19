@@ -8,11 +8,6 @@ export const useGetUserId = () => {
 }
 
 export const useGetUserInfo = () => {
-  const [{
-    user_id, user_firstName, user_lastName, user_email, user_createdAt
-  },] = useContext(JFHContext);
-  return {
-    user_id, user_firstName, user_lastName, user_email, user_createdAt,
-    user_fullName: user_firstName + " " + user_lastName,
-  }
+  const [{ user_id, user },] = useContext(JFHContext);
+  return { ...user, user_id }
 }
