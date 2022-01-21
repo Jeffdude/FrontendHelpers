@@ -32,7 +32,7 @@ function useGetAuthQuery(endpoint, options) {
   )
 }
 
-const invalidateCache = () => {
+export const invalidateCache = () => {
   queryClient.invalidateQueries('user');
   queryClient.invalidateQueries('users');
   queryClient.invalidateQueries('auth');
