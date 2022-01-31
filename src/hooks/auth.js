@@ -32,10 +32,8 @@ function useGetAuthQuery(endpoint, options) {
   )
 }
 
-export const invalidateCache = () => {
-  queryClient.invalidateQueries('user');
-  queryClient.invalidateQueries('users');
-  queryClient.invalidateQueries('auth');
+export const invalidateJFHCache = () => {
+  queryClient.invalidateQueries();
 }
 
 export function useCreateAccount(options = {}){
@@ -45,7 +43,7 @@ export function useCreateAccount(options = {}){
     endpoint: "users/create",
     method: "POST",
     verb: "creating account",
-    options: mergeQueryOptions(options, { onSuccess: invalidateCache }),
+    options: mergeQueryOptions(options, { onSuccess: invalidateJFHCache }),
     createMutationCallOptions: {
       onSuccess: ({result, submittedData})=> {
         if(result && result.id) {
@@ -101,7 +99,7 @@ export function useLogin(options = {}){
     endpoint: "auth",
     method: "POST",
     verb: "logging in",
-    options: mergeQueryOptions(options, { onSuccess: invalidateCache }),
+    options: mergeQueryOptions(options, { onSuccess: invalidateJFHCache }),
     createMutationCallOptions: { onSuccess: ({result}) => {
       if (result && result.accessToken && result.refreshToken && result.expiresIn) {
         dispatch({
@@ -129,7 +127,7 @@ export function useLogout(options = {}) {
     body: false,
     options: mergeQueryOptions(options, { onSuccess: async () => {
       await dispatch({type: ACTIONS.resetAuth});
-      invalidateCache();
+      invalidateJFHCache();
     }}),
   })
   return accessToken ? mutation : () => dispatch({type: ACTIONS.resetAuth});
@@ -145,7 +143,7 @@ export function useDisableSession(){
     endpoint: "auth/session",
     method: "DELETE",
     verb: "disabling session",
-    options: {onSuccess: invalidateCache}
+    options: {onSuccess: invalidateJFHCache}
   })
 }
 
@@ -197,6 +195,6 @@ export function usePatchUser(userId, options = {}) {
     endpoint: "users/id/" + userId,
     method: "PATCH",
     verb: "patching user",
-    options: mergeQueryOptions(options, { onSuccess: invalidateCache }),
+    options: mergeQueryOptions(options, { onSuccess: invalidateJFHCache }),
   })
 }
