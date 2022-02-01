@@ -93,7 +93,7 @@ export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {})
     }
     if (result){ 
       result = await result.json();
-      return onSuccess ? onSuccess({result, status, submittedData: to_submit}) : {result, status};
+      return onSuccess ? onSuccess({result: result.result, status, submittedData: to_submit}) : {result: result.result, status};
     }
     return {result: false, status};
   }
