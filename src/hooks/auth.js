@@ -32,7 +32,7 @@ function useGetAuthQuery(endpoint, options) {
   )
 }
 
-export const invalidateJFHCache = () => {
+export function invalidateJFHCache() {
   queryClient.invalidateQueries();
 }
 
