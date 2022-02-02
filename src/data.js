@@ -13,23 +13,25 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
   const backendURL = useGetBackendURL();
   const header = useGetHeader();
   const debug = useGetDebug();
-  const enabled = (options?.enabled !== undefined ? options.enabled : true) && header !== undefined;
+  const valid = header !== undefined;
 
   // caching invalidations from either
   const cache = Array.isArray(key) ? key.concat(endpoint) : [key, endpoint];
-  if (debug && enabled) console.log("[Debug][GET][" + version + "][" + endpoint + "] Loading...")
   try {
     const query = useQuery(
       cache,
       () => fetch(
-        (version === "v1" ? backendURL.v1 : backendURL.v2) + endpoint,
-        {
-          method: "GET",
-          headers: header,
-        },
-      ).then(res => res.json()),
+          (version === "v1" ? backendURL.v1 : backendURL.v2) + endpoint,
+          {
+            method: "GET",
+            headers: header,
+          },
+        ).then(res => res.json()),
       options,
     )
+    if (query.status === 'loading' || query.isFetching){
+      if (debug && valid) console.log("[Debug][GET][" + version + "][" + endpoint + "] Loading...")
+    }
     if (query.error) {
       console.log(
         "[!] Error fetching", key, "endpoint \"", endpoint, "\":", query.error
@@ -42,7 +44,7 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
       );
       return query;
     }
-    if (debug && enabled) console.log("[Debug][GET][" + version + "][" + endpoint + "] Success.")
+    if (debug && query.status === 'success' && !query.isFetching) console.log("[Debug][GET][" + version + "][" + endpoint + "] Success.")
     return query;
   } catch (error) {
     console.log("[!] Error fetching", key, "endpoint \"", endpoint, "\":", error);
@@ -55,6 +57,8 @@ export function useCreateMutation(
 ) {
   const authHeader = useGetHeader();
   const backendURL = useGetBackendURL();
+  const debug = useGetDebug();
+
   const mutationFn  = useMutation(
     ({to_submit}) => fetch(
       backendURL.v1 + endpoint,
@@ -68,7 +72,14 @@ export function useCreateMutation(
         body: body ? JSON.stringify(to_submit) : undefined,
       },
     ),
-    options,
+    mergeQueryOptions(options, {
+      onMutate: ({ to_submit }) => {
+        if(debug) console.log(`[Debug][${method}][v1][${endpoint}] Submitting:`, to_submit)
+      },
+      onSuccess: ({ to_submit }) => {
+        if(debug) console.log(`[Debug][${method}][v1][${endpoint}] Success.`)
+      }
+    })
   )
   return createMutationCall(mutationFn, verb, createMutationCallOptions)
 }
@@ -158,15 +169,20 @@ export function QueryLoader({query, propName, pageCard, children, ...props}) {
  */
 export function mergeQueryOptions(...optionsList) {
   let result = {};
-  optionsList.forEach(options => Object.entries(options).forEach(([key, value]) => {
-    if(result?.key && ["onMutate", "onSuccess", "onError", "onSettled"].includes(result.key)) {
-      result[key] = (...queryResults) => {
-        result[key](...queryResults);
-        value(...queryResults);
+  const onFns = {onMutate: [], onSuccess: [], onError: [], onSettled: []};
+  optionsList.forEach(options => {
+    for (const key in options) {
+      if(["onMutate", "onSuccess", "onError", "onSettled"].includes(key)) {
+        onFns[key].push(options[key])
+      } else {
+        result[key] = value
       }
-    } else {
-      result = {...result, [key]: value}
     }
-  }));
+  });
+  for (const fn in onFns) {
+    result[fn] = (...args) => {
+      onFns[fn].forEach(onFn => onFn(...args))
+    }
+  }
   return result;
 }

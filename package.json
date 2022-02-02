@@ -1,6 +1,6 @@
 {
   "name": "@jeffdude/frontend-helpers",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Authentication + Various Helpers I use",
   "main": "dist/index.js",
   "dependencies": {
@@ -37,6 +37,7 @@
   "bugs": {
     "url": "https://github.com/Jeffdude/FrontendHelpers/issues"
   },
+  "homepage": "https://github.com/Jeffdude/FrontendHelpers#readme",
   "browserslist": {
     "production": [
       ">0.2%",

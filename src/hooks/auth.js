@@ -68,7 +68,7 @@ export function useLoadUserInfo(){
   const dispatch = useGetDispatch();
   const accessToken = useGetAccessToken();
   const userId = useGetUserId();
-  const previous = usePrevious({accessToken, userId})
+  const previous = usePrevious({accessToken})
 
   const { refetch : refetchId } = useGetAuthQuery(
     "users/self",
@@ -79,7 +79,6 @@ export function useLoadUserInfo(){
       refetchOnMount: false,
       refetchOnReconnect: false,
       onSettled: (data, error) => {
-        console.log("users/self", {accessToken, data, error})
         if(error || !data?.result) {
           console.log("[!] Error fetching userId:", error, data?.result);
           dispatch({type: ACTIONS.resetAuth});
@@ -90,16 +89,21 @@ export function useLoadUserInfo(){
       }
     }
   )
-  const { refetch : refetchInfo } = useGetAuthQuery(
+  useEffect(() => {
+    if(!!accessToken && !userId && previous?.accessToken !== accessToken){
+      refetchId()
+    }
+  }, [accessToken, userId])
+
+  useGetAuthQuery(
     "users/id/" + userId,
     {
-      enabled: false,
+      enabled: !!userId,
       version: "v2",
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
       onSettled: (data, error) => {
-        console.log("users/id", {userId, accessToken, data, error})
         if(error || !data?.result){
           console.log("[!] Error fetching user info:", data?.result);
           dispatch({type: ACTIONS.resetAuth})
@@ -109,33 +113,6 @@ export function useLoadUserInfo(){
       }
     }
   )
-
-  useEffect(() => {
-    if(previous?.accessToken && previous?.accessToken == accessToken) console.log("accessToken worth it")
-    if(!!accessToken && !userId && previous?.accessToken !== accessToken){
-      console.log("fetching Id")
-      console.log({
-        previousAccessToken: previous?.accessToken, previousUserId: previous?.userId,
-        accessToken, userId,
-      });
-      refetchId()
-    }
-  }, [accessToken, userId])
-  useEffect(() => {
-    console.log("user info", {
-      previousAccessToken: previous?.accessToken, previousUserId: previous?.userId,
-      accessToken, userId,
-    });
-    if(previous?.userId && previous?.userId == userId) console.log("userId worth it")
-    if (!!userId && !!accessToken && previous?.accessToken !== accessToken && previous?.userId !== userId) {
-      console.log("fetching info")
-      console.log({
-        previousAccessToken: previous?.accessToken, previousUserId: previous?.userId,
-        accessToken, userId,
-      });
-      refetchInfo()
-    }
-  }, [accessToken, userId])
 }
 
 export function useLogin(options = {}){
@@ -171,13 +148,11 @@ export function useLogout(options = {}) {
     verb: "logging out",
     body: false,
     options: mergeQueryOptions(options, { onSuccess: async () => {
-      console.log("useLogout1")
       await dispatch({type: ACTIONS.resetAuth});
       invalidateJFHCache();
     }}),
   })
   return accessToken ? mutation : () => {
-    console.log("useLogout2");
     dispatch({type: ACTIONS.resetAuth});
   }
 }

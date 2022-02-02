@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { useGetDebug, useSetDebug } from './hooks/debug';
 import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser } from './hooks/auth';
 import { useGetUserInfo } from './hooks/user';
-import { QueryLoader } from './data';
 
 const PatchUserTest = ({userInfo}) => {
   const [firstName, setFirstName] = useState(userInfo.firstName ? userInfo.firstName : '')
