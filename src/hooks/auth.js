@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useRef, useContext, useEffect } from 'react';
 
 import { useCreateMutation, useGetQuery, queryClient, mergeQueryOptions } from '../data';
 import { getDateAfter } from '../date';
@@ -56,41 +56,86 @@ export function useCreateAccount(options = {}){
   })
 }
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 export function useLoadUserInfo(){
   const dispatch = useGetDispatch();
   const accessToken = useGetAccessToken();
-  useGetAuthQuery(
+  const userId = useGetUserId();
+  const previous = usePrevious({accessToken, userId})
+
+  const { refetch : refetchId } = useGetAuthQuery(
     "users/self",
     {
-      enabled: !!accessToken,
+      enabled: false,
       version: "v2",
       refetchOnWindowFocus: false,
-      onSettled: ({ result }) => {
-        if(result?.id){
-          dispatch({type: ACTIONS.setUserId, payload: result.id})
-        } else {
-          console.log("[!] Error fetching userId:", result);
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      onSettled: (data, error) => {
+        console.log("users/self", {accessToken, data, error})
+        if(error || !data?.result) {
+          console.log("[!] Error fetching userId:", error, data?.result);
+          dispatch({type: ACTIONS.resetAuth});
+        }
+        if(data?.result?.id){
+          dispatch({type: ACTIONS.setUserId, payload: data.result.id})
         }
       }
     }
   )
-  const userId = useGetUserId();
-  useGetAuthQuery(
+  const { refetch : refetchInfo } = useGetAuthQuery(
     "users/id/" + userId,
     {
-      enabled: !!userId,
+      enabled: false,
       version: "v2",
       refetchOnWindowFocus: false,
-      onSettled: ({ result }) => {
-        if(!result){
-          console.log("[!] Error fetching user info:", result);
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      onSettled: (data, error) => {
+        console.log("users/id", {userId, accessToken, data, error})
+        if(error || !data?.result){
+          console.log("[!] Error fetching user info:", data?.result);
           dispatch({type: ACTIONS.resetAuth})
         } else {
-          dispatch({type: ACTIONS.setUserInfo, payload: result})
+          dispatch({type: ACTIONS.setUserInfo, payload: data.result})
         }
       }
     }
   )
+
+  useEffect(() => {
+    if(previous?.accessToken && previous?.accessToken == accessToken) console.log("accessToken worth it")
+    if(!!accessToken && !userId && previous?.accessToken !== accessToken){
+      console.log("fetching Id")
+      console.log({
+        previousAccessToken: previous?.accessToken, previousUserId: previous?.userId,
+        accessToken, userId,
+      });
+      refetchId()
+    }
+  }, [accessToken, userId])
+  useEffect(() => {
+    console.log("user info", {
+      previousAccessToken: previous?.accessToken, previousUserId: previous?.userId,
+      accessToken, userId,
+    });
+    if(previous?.userId && previous?.userId == userId) console.log("userId worth it")
+    if (!!userId && !!accessToken && previous?.accessToken !== accessToken && previous?.userId !== userId) {
+      console.log("fetching info")
+      console.log({
+        previousAccessToken: previous?.accessToken, previousUserId: previous?.userId,
+        accessToken, userId,
+      });
+      refetchInfo()
+    }
+  }, [accessToken, userId])
 }
 
 export function useLogin(options = {}){
@@ -100,7 +145,7 @@ export function useLogin(options = {}){
     method: "POST",
     verb: "logging in",
     options: mergeQueryOptions(options, { onSuccess: invalidateJFHCache }),
-    createMutationCallOptions: { onSuccess: ({result}) => {
+    createMutationCallOptions: { version: 1, onSuccess: ({result}) => {
       if (result && result.accessToken && result.refreshToken && result.expiresIn) {
         dispatch({
           type: ACTIONS.setAuthTokens, 
@@ -126,11 +171,15 @@ export function useLogout(options = {}) {
     verb: "logging out",
     body: false,
     options: mergeQueryOptions(options, { onSuccess: async () => {
+      console.log("useLogout1")
       await dispatch({type: ACTIONS.resetAuth});
       invalidateJFHCache();
     }}),
   })
-  return accessToken ? mutation : () => dispatch({type: ACTIONS.resetAuth});
+  return accessToken ? mutation : () => {
+    console.log("useLogout2");
+    dispatch({type: ACTIONS.resetAuth});
+  }
 }
 
 export function useGetSessions() {

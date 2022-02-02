@@ -18,13 +18,17 @@ JFHContext.displayName = "JFHContext"
 
 const JFHCookies = new Cookies();
 
-const UserLoader = ({children}) => {
+const UserLoader = () => {
   useLoadUserInfo();
-  return children;
+  return <></>;
 }
 
 const JFHApp = ({config, children}) => {
-  const loggingMiddleware = (action, state) => { if(state.debug) console.log(action) };
+  const loggingMiddleware = (action, state) => {
+    if(state.debug) {
+      console.log(action)
+    }
+  };
   const persistAfterware = (_, state) => {
     JFHCookies.set('JFHCookie', state, {path: '/'})
   }
@@ -40,9 +44,8 @@ const JFHApp = ({config, children}) => {
   return (
     <QueryClientProvider client={queryClient}>
       <JFHContext.Provider value={[state, dispatch]}>
-        <UserLoader>
-          {children}
-        </UserLoader>
+        <UserLoader/>
+        {children}
       </JFHContext.Provider>
     </QueryClientProvider>
   );

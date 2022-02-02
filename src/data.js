@@ -73,7 +73,7 @@ export function useCreateMutation(
   return createMutationCall(mutationFn, verb, createMutationCallOptions)
 }
 
-export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {}) {
+export function createMutationCall(mutationFn, mutationVerb, { version = 2, onSuccess } = {}) {
   const { mutateAsync, error, status } = mutationFn;
   return async (to_submit) => {
     let result;
@@ -93,7 +93,8 @@ export function createMutationCall(mutationFn, mutationVerb, { onSuccess } = {})
     }
     if (result){ 
       result = await result.json();
-      return onSuccess ? onSuccess({result: result.result, status, submittedData: to_submit}) : {result: result.result, status};
+      if(version === 2) result = result.result;
+      return onSuccess ? onSuccess({result, status, submittedData: to_submit}) : {result, status};
     }
     return {result: false, status};
   }

@@ -1,8 +1,6 @@
-/*
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-*/
 
 export * from './context';
 import JFHApp from './context';
@@ -16,7 +14,6 @@ export * from './constants';
 export * from './data';
 export * from './date';
 
-/*
 ReactDOM.render(
   <React.StrictMode>
     <JFHApp config={{backendURL: "http://192.168.0.88:3600"}}>
@@ -25,4 +22,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
-*/

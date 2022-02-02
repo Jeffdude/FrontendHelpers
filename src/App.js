@@ -42,7 +42,6 @@ function App() {
     const result = await login({email, password})
     console.log("result:", result);
   }
-  const userInfoQuery = useGetSelf();
   const authState = useGetAuthState();
   const userInfo = useGetUserInfo()
   return (
@@ -65,7 +64,7 @@ function App() {
       <form onSubmit={onSubmitSignIn}>
         <button type="submit">Sign In</button>
       </form>
-      {authState && <QueryLoader query={userInfoQuery} propName="userInfo"><PatchUserTest userInfo={userInfo}/></QueryLoader>}
+      {authState && <PatchUserTest userInfo={userInfo}/>}
     </div>
   );
 }
