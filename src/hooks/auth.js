@@ -45,6 +45,7 @@ export function useCreateAccount(options = {}){
     verb: "creating account",
     options: mergeQueryOptions(options, { onSuccess: invalidateJFHCache }),
     createMutationCallOptions: {
+      version: 1,
       onSuccess: ({result, submittedData})=> {
         if(result && result.id) {
           const { email, password } = submittedData;
