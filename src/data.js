@@ -111,8 +111,9 @@ export function createMutationCall(mutationFn, mutationVerb, { version = 2, onSu
   }
 }
 
-export function onQuerySuccess(query, thenFn, {name = "Resource", pageCard = false} = {}) {
+export function onQuerySuccess(query, thenFn, {loadingComponent, name = "Resource", pageCard = false} = {}) {
   if(query.status === 'loading' || query.status === 'idle') {
+    if(loadingComponent) return loadingComponent();
     return (
       <div>
         {name} loading...
@@ -150,7 +151,7 @@ export function onQuerySuccess(query, thenFn, {name = "Resource", pageCard = fal
   return thenFn(query.data);
 }
 
-export function QueryLoader({query, propName, pageCard, children, ...props}) {
+export function QueryLoader({query, propName, pageCard, loading, children, ...props}) {
   return onQuerySuccess(query, (data) => {
     if(!data.result) return (<h3>{propName} Not Found.</h3>);
     return React.Children.map(children, child => {
@@ -159,7 +160,7 @@ export function QueryLoader({query, propName, pageCard, children, ...props}) {
       }
       return child;
     });
-  }, {name: propName, pageCard});
+  }, {name: propName, pageCard, loadingComponent: loading});
 }
 
 /*
