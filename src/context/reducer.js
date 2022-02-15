@@ -8,7 +8,7 @@ export default function reducer(state, action) {
       return {...state, access_token, refresh_token, expires_at}
 
     case ACTIONS.resetAuth:
-      return {...DEFAULT_STATE, ...state.config};
+      return {...DEFAULT_STATE, ...state.config, config: state.config};
 
     case ACTIONS.setUserId:
       const id = action.payload;
