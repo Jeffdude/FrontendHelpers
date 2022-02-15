@@ -6,7 +6,7 @@ import { useGetUserId } from './user'
 
 import { JFHContext, useGetDispatch, ACTIONS } from '../context';
 
-const useGetAccessToken = () => {
+export const useGetAccessToken = () => {
   const [{access_token},] = useContext(JFHContext);
   return access_token;
 }
