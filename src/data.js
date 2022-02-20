@@ -151,7 +151,8 @@ export function onQuerySuccess(query, thenFn, {loadingComponent, name = "Resourc
   return thenFn(query.data);
 }
 
-export function QueryLoader({query, propName, pageCard, loading, children, ...props}) {
+export function QueryLoader({query, propName, generateQuery = false, pageCard, loading, children, ...props}) {
+  if(generateQuery) query = query();
   return onQuerySuccess(query, (data) => {
     if(!data.result) return (<h3>{propName} Not Found.</h3>);
     return React.Children.map(children, child => {

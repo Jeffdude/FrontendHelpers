@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { useGetDebug, useSetDebug } from './hooks/debug';
 import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser } from './hooks/auth';
 import { useGetUserInfo } from './hooks/user';
+import { QueryLoader } from './data';
 
 const PatchUserTest = ({userInfo}) => {
   const [firstName, setFirstName] = useState(userInfo.firstName ? userInfo.firstName : '')
@@ -17,6 +18,15 @@ const PatchUserTest = ({userInfo}) => {
         <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder='name'/>
         <button type="submit">save</button>
       </form>
+    </div>
+  )
+}
+
+const QueryLoaderTest = ({user}) => {
+  return (
+    <div style={{marginTop: "20px", border: "2px solid black"}}>
+      - QueryLoader test -<br/>
+      {JSON.stringify(user)}
     </div>
   )
 }
@@ -64,6 +74,7 @@ function App() {
         <button type="submit">Sign In</button>
       </form>
       {authState && <PatchUserTest userInfo={userInfo}/>}
+      {authState && <QueryLoader query={useGetSelf} propName="user" generateQuery><QueryLoaderTest/></QueryLoader>}
     </div>
   );
 }
