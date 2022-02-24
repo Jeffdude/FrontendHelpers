@@ -19,7 +19,7 @@ export default function reducer(state, action) {
       return {
         ...state,
         auth_state: permissionLevelToAuthState(permissionLevel),
-        user: userInfo
+        user: {permissionLevel, ...userInfo},
       }
 
     case ACTIONS.setDebug:
