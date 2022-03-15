@@ -53,7 +53,7 @@ export function useGetQuery(endpoint, key, { version = "v1", ...options } = {}) 
 }
 
 export function useCreateMutation(
-  {endpoint, method, headers = {}, verb, body = true, options, createMutationCallOptions}
+  {endpoint, method, headers = {}, verb, body = true, noAuth = false, options, createMutationCallOptions}
 ) {
   const authHeader = useGetHeader();
   const backendURL = useGetBackendURL();
@@ -65,7 +65,7 @@ export function useCreateMutation(
       {
         method,
         headers: {
-          ...authHeader,
+          ...(noAuth ? {} : authHeader),
           ...(body ? {"Content-Type": "application/json"} : {}),
           ...headers,
         },

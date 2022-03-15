@@ -8,8 +8,8 @@ export const AUTH_STATE = {
 export const authStateToString = ( state ) => (
   {
     0: "None",
-    1: "Read Only",
-    5: "Read Write",
+    1: "User",
+    5: "Ambassador",
     500: "Admin",
   }[state]
 );

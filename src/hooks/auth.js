@@ -223,3 +223,21 @@ export function usePatchUser(userId, options = {}) {
     options: mergeQueryOptions(options, { onSuccess: invalidateJFHCache }),
   })
 }
+
+export function useCreatePasswordResetToken(options = {}){
+  return useCreateMutation({
+    endpoint: 'auth/token/password_reset',
+    method: 'POST',
+    verb: 'creating password reset token',
+    ...options
+  })
+}
+
+export function usePasswordResetWithToken(token, options = {}){
+  return useCreateMutation({
+    noAuth: true,
+    endpoint: 'auth/reset_password/token/' + token,
+    method: 'POST',
+    verb: 'resetting password with a token',
+  })
+} 
