@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { useGetDebug, useSetDebug } from './hooks/debug';
-import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser, usePasswordResetWithToken } from './hooks/auth';
+import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser, usePasswordResetWithToken, useRefresh } from './hooks/auth';
 import { useGetUserInfo } from './hooks/user';
 import { QueryLoader } from './data';
+import { JFHContext } from './context';
 
 const PatchUserTest = ({userInfo}) => {
   const [firstName, setFirstName] = useState(userInfo.firstName ? userInfo.firstName : '')
@@ -61,6 +62,18 @@ const PWResetTestWithKey = ({token}) => {
   )
 }
 
+const RefreshTokenTest = () => {
+  const [{refresh_token},] = useContext(JFHContext);
+  const refreshToken = useRefresh();
+
+  return (
+    <div style={{marginTop: "20px", border: "2px solid black"}}>
+      - Refresh Token Test - <br/>
+      <button onClick={() => refreshToken({refresh_token})}>refresh</button>
+    </div>
+  )
+}
+
 function App() {
   const debugState = useGetDebug();
   const login = useLogin();
@@ -106,6 +119,7 @@ function App() {
       {authState && <PatchUserTest userInfo={userInfo}/>}
       {authState && <QueryLoader query={useGetSelf} propName="user" generateQuery><QueryLoaderTest/></QueryLoader>}
       {!authState && <PWResetTest/>}
+      {authState && <RefreshTokenTest/>}
     </div>
   );
 }

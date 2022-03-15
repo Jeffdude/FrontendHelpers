@@ -116,6 +116,30 @@ export function useLoadUserInfo(){
   )
 }
 
+export function useRefresh(options = {}){
+  const dispatch = useGetDispatch();
+  return useCreateMutation({
+    endpoint: "auth/refresh",
+    method: "POST",
+    verb: "refreshing token",
+    options,
+    createMutationCallOptions: { version: 1, onSuccess: ({result}) => {
+      if (result && result.accessToken && result.refreshToken && result.expiresIn) {
+        dispatch({
+          type: ACTIONS.setAuthTokens, 
+          payload: {
+            access_token: result.accessToken,
+            refresh_token: result.refreshToken,
+            expires_at: getDateAfter(result.expiresIn),
+          },
+        });
+        return {result: true}
+      }
+      return {result: false};
+    }}
+  })
+}
+
 export function useLogin(options = {}){
   const dispatch = useGetDispatch();
   return useCreateMutation({
