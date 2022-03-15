@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useGetDebug, useSetDebug } from './hooks/debug';
-import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser } from './hooks/auth';
+import { useLogin, useLogout, useCreateAccount, useGetSelf, useGetAuthState, usePatchUser, usePasswordResetWithToken } from './hooks/auth';
 import { useGetUserInfo } from './hooks/user';
 import { QueryLoader } from './data';
 
@@ -27,6 +27,36 @@ const QueryLoaderTest = ({user}) => {
     <div style={{marginTop: "20px", border: "2px solid black"}}>
       - QueryLoader test -<br/>
       {JSON.stringify(user)}
+    </div>
+  )
+}
+
+const PWResetTest = () => {
+  const [token, settoken] = useState('');
+  return (
+    <div style={{marginTop: "20px", border: "2px solid black"}}>
+      - PW Reset Test - <br/>
+      <input type="text" value={token} onChange={e => settoken(e.target.value)} placeholder='key'/>
+      {token && <PWResetTestWithKey token={token}/>}
+    </div>
+  )
+}
+
+const PWResetTestWithKey = ({token}) => {
+
+  const [password, setPassword] = useState('')
+  const resetPasswordWithToken = usePasswordResetWithToken(token);
+  const onSubmit = (e) => {
+    e.preventDefault();
+    resetPasswordWithToken({password});
+  }
+
+  return (
+    <div style={{marginTop: "20px"}}>
+      <form onSubmit={onSubmit}>
+        <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder='new password'/>
+        <button type="submit">save</button>
+      </form>
     </div>
   )
 }
@@ -75,6 +105,7 @@ function App() {
       </form>
       {authState && <PatchUserTest userInfo={userInfo}/>}
       {authState && <QueryLoader query={useGetSelf} propName="user" generateQuery><QueryLoaderTest/></QueryLoader>}
+      {!authState && <PWResetTest/>}
     </div>
   );
 }
