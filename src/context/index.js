@@ -34,7 +34,11 @@ const JWTRefresher = () => {
         const expirationDate = new Date(expires_at)
         const now = new Date()
         const msLeft = (expirationDate - now)
-        if(msLeft < ((1000 * 60 * 60 * 24))){ // < 1 day remaining
+        if(msLeft < ((1000 * 60 * 60 * 24 * 4))){
+          /* < 4 days remaining 
+           * Backend JWT expires in 5d, so refresh everyday, 
+           *  and can tolerate <5 days without login while preserving user's authentication
+           */
           refreshToken({refresh_token})
         }
         return () => clearTimeout(timer);
