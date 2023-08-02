@@ -64,3 +64,9 @@ function useMyMutation(){
 2. In `src/index.js`, uncomment the ReactDom.render() codeblock and the imports it uses.
   - Here you can configure the `backendURL`.
 3. Make sure your backend is running, and run `npm start`
+
+## Deploying
+
+1. Iterate version number in `package.json`
+2. `npm run build`
+3. `npm login && npm publish`
