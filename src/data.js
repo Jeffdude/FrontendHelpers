@@ -87,9 +87,10 @@ export function useCreateMutation(
 export function createMutationCall(mutationFn, mutationVerb, { version = 2, onSuccess } = {}) {
   const { mutateAsync, error, status } = mutationFn;
   return async (to_submit) => {
-    let result;
+    let queryResult, body;
     try {
-      result = await mutateAsync({to_submit})
+      queryResult = await mutateAsync({to_submit})
+      body = await queryResult.json();
     } catch (error) {
       console.log("[!] Error", mutationVerb, ":", error);
       return {result: false, status};
@@ -98,13 +99,13 @@ export function createMutationCall(mutationFn, mutationVerb, { version = 2, onSu
       console.log("[!] Error", mutationVerb, ":", error);
       return {result: false, status};
     }
-    if (!result || result.error || !result.ok){
-      console.log("[!] Error", mutationVerb, ":", result.status, result?.error);
-      return {result: false, status};
+    if (!queryResult || body.error || !queryResult.ok){
+      console.log("[!] Error", mutationVerb, ":", queryResult.status, body?.error);
+      return {result: false, status, error: body?.error};
     }
-    if (result){ 
-      result = await result.json();
-      if(version === 2) result = result.result;
+    if (queryResult.ok){ 
+      let result = body;
+      if(version === 2) result = body.result;
       return onSuccess ? onSuccess({result, status, submittedData: to_submit}) : {result, status};
     }
     return {result: false, status};

@@ -19,7 +19,7 @@ export * from './date';
 /*
 ReactDOM.render(
   <React.StrictMode>
-    <JFHApp config={{backendURL: "http://192.168.0.88:3600"}}>
+    <JFHApp config={{backendURL: "http://192.168.0.204:3600"}}>
       <App />
     </JFHApp>
   </React.StrictMode>,
